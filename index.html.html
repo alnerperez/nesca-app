@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NESCA - Member's Information Record</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        nesca: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better visual feel */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- MAIN HEADER & LOGO SECTION -->
+    <header class="bg-nesca-800 text-white shadow-lg border-b-4 border-amber-500 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Logo and Title Block -->
+                <div class="flex items-center gap-4 text-center md:text-left">
+                    <div class="relative group flex-shrink-0">
+                        <div id="logoContainer" class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full p-1 shadow-md flex items-center justify-center overflow-hidden border-2 border-amber-400">
+                            <!-- Default Badge Icon or Uploaded Logo -->
+                            <div id="defaultLogo" class="flex flex-col items-center justify-center text-nesca-800">
+                                <i class="fa-solid font-bold text-2xl sm:text-3xl fa-tree"></i>
+                                <span class="text-[9px] font-extrabold tracking-wider uppercase">NESCA</span>
+                            </div>
+                            <img id="customLogoImg" class="hidden w-full h-full object-cover rounded-full" alt="NESCA Logo">
+                        </div>
+                        
+                        <!-- Logo Upload Hover Button -->
+                        <label for="logoUpload" class="absolute inset-0 bg-black/60 text-white rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs font-medium text-center p-1">
+                            <i class="fa-solid fa-camera text-sm mb-0.5"></i>
+                            <span>Change Logo</span>
+                        </label>
+                        <input type="file" id="logoUpload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                    </div>
+
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-bold tracking-tight text-white leading-tight">
+                            Narra Evergreen Senior Citizen Association (NESCA)
+                        </h1>
+                        <p class="text-slate-200 text-xs sm:text-sm font-medium flex items-center justify-center md:justify-start gap-1.5 mt-0.5 opacity-90">
+                            <i class="fa-solid fa-location-dot text-amber-400"></i> Francisco Homes, Barangay Narra, City of San Jose del Monte, Bulacan
+                        </p>
+                        <p class="text-amber-300 font-semibold text-xs sm:text-sm tracking-wide flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                            <i class="fa-solid fa-id-card text-amber-400"></i> Member's Information Record
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Controls in Header -->
+                <div class="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+                    <button onclick="removeCustomLogo()" id="removeLogoBtn" class="hidden bg-nesca-900/60 hover:bg-nesca-900 text-slate-200 px-3 py-1.5 rounded-lg border border-nesca-700 transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Reset Logo
+                    </button>
+                    <button onclick="openNewMemberModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-base"></i> Add New Member
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        
+        <!-- TOP TOOLBAR: SEARCH, FILTERS & IMPORT/EXPORT -->
+        <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200 mb-6 space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                <!-- Search and Filters -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 flex-grow">
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search by name or contact..." 
+                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none transition">
+                    </div>
+
+                    <!-- Filter by Status -->
+                    <select id="statusFilter" onchange="renderTable()" class="w-full sm:w-44 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Active">Active Only</option>
+                        <option value="Inactive">Inactive Only</option>
+                    </select>
+
+                    <!-- Filter by Group -->
+                    <select id="groupFilter" onchange="renderTable()" class="w-full sm:w-44 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                        <option value="ALL">All Groups</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Flash Drive Import & Export Controls -->
+                <div class="flex flex-wrap items-center gap-2 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+                    <!-- Export to CSV -->
+                    <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-3.5 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 shadow-sm transition" title="Save formatted table to Flash Drive CSV">
+                        <i class="fa-solid fa-file-csv text-base"></i> Export CSV
+                    </button>
+
+                    <!-- Backup JSON -->
+                    <button onclick="exportToJSON()" class="bg-blue-700 hover:bg-blue-800 text-white font-medium px-3.5 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 shadow-sm transition" title="Backup full database file">
+                        <i class="fa-solid fa-download"></i> Backup Data
+                    </button>
+
+                    <!-- Import Data -->
+                    <label class="bg-slate-700 hover:bg-slate-800 text-white font-medium px-3.5 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-2 shadow-sm transition cursor-pointer" title="Import backup file from Flash Drive">
+                        <i class="fa-solid fa-upload"></i> Import File
+                        <input type="file" id="importFileInput" accept=".csv,.json" class="hidden" onchange="handleImportFile(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- MEMBER DATA TABLE -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Table Sub-Header Summary -->
+            <div class="px-5 py-3.5 bg-slate-100/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <span class="font-semibold text-slate-700 text-sm">Member Records</span>
+                    <span id="recordBadge" class="bg-nesca-100 text-nesca-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-nesca-600/30">0 Total</span>
+                </div>
+                <div class="text-xs text-slate-500 font-medium space-x-3">
+                    <span>Active: <strong id="activeCount" class="text-emerald-700">0</strong></span>
+                    <span>Inactive: <strong id="inactiveCount" class="text-rose-700">0</strong></span>
+                </div>
+            </div>
+
+            <!-- Table Scroll Container -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[900px]">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider border-b border-slate-200">
+                            <th class="py-3 px-4">Member Name</th>
+                            <th class="py-3 px-4">Age / DOB</th>
+                            <th class="py-3 px-4">Contact & Address</th>
+                            <th class="py-3 px-4">Group</th>
+                            <th class="py-3 px-4 text-center">Attendance</th>
+                            <th class="py-3 px-4 text-right">Dues (₱)</th>
+                            <th class="py-3 px-4 text-center">Status</th>
+                            <th class="py-3 px-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic Rows loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-users-slash"></i>
+                </div>
+                <h3 class="text-base font-semibold text-slate-700">No Member Records Found</h3>
+                <p class="text-slate-500 text-xs sm:text-sm mt-1">Try adjusting your search filter or click "Add New Member" to begin.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-800 text-slate-400 text-xs py-4 text-center border-t border-slate-700 mt-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Narra Evergreen Senior Citizen Association (NESCA) &copy; <span id="yearSpan"></span>. Data is saved locally in your browser memory and ready for flash drive export.</p>
+        </div>
+    </footer>
+
+    <!-- MEMBER FORM MODAL (CREATE & EDIT) -->
+    <div id="memberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8 overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            
+            <!-- Modal Header -->
+            <div class="bg-nesca-800 text-white px-6 py-4 flex items-center justify-between border-b border-nesca-900">
+                <div class="flex items-center gap-2.5">
+                    <i id="modalIcon" class="fa-solid fa-user-plus text-amber-400 text-lg"></i>
+                    <h2 id="modalTitle" class="text-lg font-bold">Add New Member Record</h2>
+                </div>
+                <button onclick="closeMemberModal()" class="text-slate-300 hover:text-white text-xl p-1 focus:outline-none">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form Body -->
+            <form id="memberForm" onsubmit="saveMemberForm(event)" class="p-6 overflow-y-auto flex-grow space-y-4">
+                <input type="hidden" id="memberId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    
+                    <!-- 1. Full Name -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">1. Full Name <span class="text-rose-500">*</span></label>
+                        <input type="text" id="fullName" required placeholder="e.g. Juan De La Cruz" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 3. Date of Birth -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">3. Date of Birth <span class="text-rose-500">*</span></label>
+                        <input type="date" id="dob" required onchange="calculateAgeFromDOB()" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 4. Age -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">4. Age (Years)</label>
+                        <input type="number" id="age" min="0" placeholder="Auto-calculated" 
+                            class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 focus:outline-none">
+                    </div>
+
+                    <!-- 5. Marital Status -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">5. Marital Status</label>
+                        <select id="maritalStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Widowed">Widowed</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Separated">Separated</option>
+                        </select>
+                    </div>
+
+                    <!-- 7. Spouse Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">7. Spouse Name</label>
+                        <input type="text" id="spouseName" placeholder="N/A if single" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 2. Address (Full Width Span) -->
+                    <div class="sm:col-span-2 md:col-span-3">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">2. Complete Address <span class="text-rose-500">*</span></label>
+                        <input type="text" id="address" required placeholder="Barangay, Street, City / Municipality, Province" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 6. Contact Number -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">6. Contact Number <span class="text-rose-500">*</span></label>
+                        <input type="tel" id="contactNumber" required placeholder="0917 123 4567" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 8. Date Become Member -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">8. Membership Date <span class="text-rose-500">*</span></label>
+                        <input type="date" id="dateBecomeMember" required 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 14. Group -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">14. Assigned Group <span class="text-rose-500">*</span></label>
+                        <input type="text" id="group" required placeholder="e.g. Zone 1, Group A" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 9. Initial Membership Payment -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">9. Initial Payment (₱)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-500 text-sm">₱</span>
+                            <input type="number" step="0.01" id="initialPayment" placeholder="0.00" 
+                                class="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- 10. Annual Dues -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">10. Annual Dues (₱)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-500 text-sm">₱</span>
+                            <input type="number" step="0.01" id="annualDues" placeholder="0.00" 
+                                class="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- 11. Monthly Attendance -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">11. Monthly Attendance (%)</label>
+                        <input type="number" min="0" max="100" id="monthlyAttendance" placeholder="e.g. 90" 
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nesca-600 focus:outline-none">
+                    </div>
+
+                    <!-- 12 & 13. Status -->
+                    <div class="sm:col-span-2 md:col-span-3 border-t border-slate-100 pt-3">
+                        <label class="block text-xs font-bold text-slate-700 mb-2">12 / 13. Membership Status</label>
+                        <div class="flex items-center gap-6">
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="status" value="Active" checked class="w-4 h-4 text-nesca-600 focus:ring-nesca-500">
+                                <span class="text-sm font-semibold text-emerald-800 bg-emerald-100 px-3 py-0.5 rounded-full border border-emerald-300">Active</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="status" value="Inactive" class="w-4 h-4 text-rose-600 focus:ring-rose-500">
+                                <span class="text-sm font-semibold text-rose-800 bg-rose-100 px-3 py-0.5 rounded-full border border-rose-300">Inactive</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="border-t border-slate-200 pt-4 mt-6 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeMemberModal()" class="px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-nesca-700 hover:bg-nesca-800 text-white font-bold rounded-lg text-sm shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // CORE STATE MANAGEMENT
+        let membersData = [];
+        const STORAGE_KEY = 'NESCA_MEMBERS_DATA_V1';
+        const LOGO_STORAGE_KEY = 'NESCA_CUSTOM_LOGO';
+
+        // SAMPLE DEFAULT DATA FOR INITIAL DEMO
+        const defaultMembers = [
+            {
+                id: '1',
+                fullName: 'Maria Santos De La Cruz',
+                address: '123 Evergreen St., Brgy. San Jose, Narra',
+                dob: '1954-08-15',
+                age: 72,
+                maritalStatus: 'Widowed',
+                contactNumber: '09181234567',
+                spouseName: 'Pedro De La Cruz (Deceased)',
+                dateBecomeMember: '2015-03-10',
+                initialPayment: 500.00,
+                annualDues: 300.00,
+                monthlyAttendance: 95,
+                status: 'Active',
+                group: 'Zone 1 - Sampaguita'
+            },
+            {
+                id: '2',
+                fullName: 'Antonio Reyes Ramos',
+                address: '45 Mahogany Ave., Brgy. Poblacion, Narra',
+                dob: '1950-11-20',
+                age: 75,
+                maritalStatus: 'Married',
+                contactNumber: '09209876543',
+                spouseName: 'Elena Ramos',
+                dateBecomeMember: '2018-06-22',
+                initialPayment: 500.00,
+                annualDues: 300.00,
+                monthlyAttendance: 80,
+                status: 'Active',
+                group: 'Zone 2 - Narra Center'
+            }
+        ];
+
+        // INITIALIZATION ON LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('yearSpan').textContent = new Date().getFullYear();
+            loadLogo();
+            loadData();
+        });
+
+        // DATA PERSISTENCE HANDLERS
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    membersData = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Failed to parse stored member data", e);
+                    membersData = defaultMembers;
+                }
+            } else {
+                membersData = defaultMembers;
+                saveData();
+            }
+            populateGroupFilterOptions();
+            renderTable();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(membersData));
+            populateGroupFilterOptions();
+            renderTable();
+        }
+
+        // LOGO MANAGEMENT
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size is too large! Please upload an image smaller than 2MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64Image = e.target.result;
+                localStorage.setItem(LOGO_STORAGE_KEY, base64Image);
+                displayLogo(base64Image);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadLogo() {
+            const savedLogo = localStorage.getItem(LOGO_STORAGE_KEY);
+            if (savedLogo) {
+                displayLogo(savedLogo);
+            }
+        }
+
+        function displayLogo(src) {
+            const defaultLogo = document.getElementById('defaultLogo');
+            const customLogoImg = document.getElementById('customLogoImg');
+            const removeLogoBtn = document.getElementById('removeLogoBtn');
+
+            defaultLogo.classList.add('hidden');
+            customLogoImg.src = src;
+            customLogoImg.classList.remove('hidden');
+            removeLogoBtn.classList.remove('hidden');
+        }
+
+        function removeCustomLogo() {
+            localStorage.removeItem(LOGO_STORAGE_KEY);
+            document.getElementById('defaultLogo').classList.remove('hidden');
+            document.getElementById('customLogoImg').classList.add('hidden');
+            document.getElementById('customLogoImg').src = '';
+            document.getElementById('removeLogoBtn').classList.add('hidden');
+            document.getElementById('logoUpload').value = '';
+        }
+
+        // AGE COMPUTATION AUTOMATION
+        function calculateAgeFromDOB() {
+            const dobVal = document.getElementById('dob').value;
+            if (!dobVal) return;
+            const dob = new Date(dobVal);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            document.getElementById('age').value = age >= 0 ? age : 0;
+        }
+
+        // POPULATE DYNAMIC GROUP FILTERS
+        function populateGroupFilterOptions() {
+            const groupSelect = document.getElementById('groupFilter');
+            const currentSelected = groupSelect.value;
+            const groups = [...new Set(membersData.map(m => m.group).filter(Boolean))].sort();
+
+            groupSelect.innerHTML = '<option value="ALL">All Groups</option>';
+            groups.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                groupSelect.appendChild(opt);
+            });
+
+            groupSelect.value = currentSelected;
+        }
+
+        // TABLE RENDER ENGINE
+        function renderTable() {
+            const tbody = document.getElementById('memberTableBody');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusVal = document.getElementById('statusFilter').value;
+            const groupVal = document.getElementById('groupFilter').value;
+
+            tbody.innerHTML = '';
+
+            let filtered = membersData.filter(m => {
+                const matchesSearch = m.fullName.toLowerCase().includes(searchVal) || 
+                                      m.contactNumber.toLowerCase().includes(searchVal) ||
+                                      m.address.toLowerCase().includes(searchVal);
+                const matchesStatus = statusVal === 'ALL' || m.status === statusVal;
+                const matchesGroup = groupVal === 'ALL' || m.group === groupVal;
+                return matchesSearch && matchesStatus && matchesGroup;
+            });
+
+            // Update Header Counts
+            document.getElementById('recordBadge').textContent = `${filtered.length} Total`;
+            document.getElementById('activeCount').textContent = membersData.filter(m => m.status === 'Active').length;
+            document.getElementById('inactiveCount').textContent = membersData.filter(m => m.status === 'Inactive').length;
+
+            const emptyState = document.getElementById('emptyState');
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition-colors';
+
+                const statusBadge = m.status === 'Active'
+                    ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>Active
+                       </span>`
+                    : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-600 mr-1.5"></span>Inactive
+                       </span>`;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-slate-800">
+                        ${m.fullName}
+                        <div class="text-xs font-normal text-slate-500">${m.maritalStatus} ${m.spouseName ? '• Spouse: ' + m.spouseName : ''}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-700">${m.age} yrs</span>
+                        <div class="text-xs text-slate-500">${m.dob}</div>
+                    </td>
+                    <td class="py-3 px-4 text-xs">
+                        <div class="font-medium text-slate-700"><i class="fa-solid fa-phone text-slate-400 mr-1"></i>${m.contactNumber}</div>
+                        <div class="text-slate-500 truncate max-w-xs" title="${m.address}">${m.address}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md border border-slate-200 font-medium">${m.group}</span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="font-semibold ${m.monthlyAttendance >= 75 ? 'text-emerald-700' : 'text-amber-700'}">${m.monthlyAttendance}%</span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-medium text-slate-700">
+                        ₱${parseFloat(m.annualDues || 0).toLocaleString('en-PH', {minimumFractionDigits: 2})}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${statusBadge}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editMember('${m.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Record">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteMember('${m.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Record">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // MODAL CONTROLS & FORM SUBMISSION
+        function openNewMemberModal() {
+            document.getElementById('memberForm').reset();
+            document.getElementById('memberId').value = '';
+            document.getElementById('modalTitle').textContent = 'Add New Member Record';
+            document.getElementById('modalIcon').className = 'fa-solid fa-user-plus text-amber-400 text-lg';
+            
+            // Default current date for membership date
+            document.getElementById('dateBecomeMember').value = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('memberModal').classList.remove('hidden');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
+
+        function editMember(id) {
+            const member = membersData.find(m => m.id === id);
+            if (!member) return;
+
+            document.getElementById('memberId').value = member.id;
+            document.getElementById('fullName').value = member.fullName;
+            document.getElementById('address').value = member.address;
+            document.getElementById('dob').value = member.dob;
+            document.getElementById('age').value = member.age;
+            document.getElementById('maritalStatus').value = member.maritalStatus;
+            document.getElementById('contactNumber').value = member.contactNumber;
+            document.getElementById('spouseName').value = member.spouseName || '';
+            document.getElementById('dateBecomeMember').value = member.dateBecomeMember;
+            document.getElementById('initialPayment').value = member.initialPayment;
+            document.getElementById('annualDues').value = member.annualDues;
+            document.getElementById('monthlyAttendance').value = member.monthlyAttendance;
+            document.getElementById('group').value = member.group;
+
+            const statusRadios = document.getElementsByName('status');
+            for (let radio of statusRadios) {
+                radio.checked = (radio.value === member.status);
+            }
+
+            document.getElementById('modalTitle').textContent = 'Edit Member Record';
+            document.getElementById('modalIcon').className = 'fa-solid fa-pen-to-square text-amber-400 text-lg';
+            document.getElementById('memberModal').classList.remove('hidden');
+        }
+
+        function saveMemberForm(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('memberId').value;
+            const statusRadios = document.getElementsByName('status');
+            let selectedStatus = 'Active';
+            for (let radio of statusRadios) {
+                if (radio.checked) selectedStatus = radio.value;
+            }
+
+            const record = {
+                id: id ? id : Date.now().toString(),
+                fullName: document.getElementById('fullName').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                dob: document.getElementById('dob').value,
+                age: parseInt(document.getElementById('age').value) || 0,
+                maritalStatus: document.getElementById('maritalStatus').value,
+                contactNumber: document.getElementById('contactNumber').value.trim(),
+                spouseName: document.getElementById('spouseName').value.trim(),
+                dateBecomeMember: document.getElementById('dateBecomeMember').value,
+                initialPayment: parseFloat(document.getElementById('initialPayment').value) || 0,
+                annualDues: parseFloat(document.getElementById('annualDues').value) || 0,
+                monthlyAttendance: parseInt(document.getElementById('monthlyAttendance').value) || 0,
+                status: selectedStatus,
+                group: document.getElementById('group').value.trim()
+            };
+
+            if (id) {
+                const index = membersData.findIndex(m => m.id === id);
+                if (index !== -1) membersData[index] = record;
+            } else {
+                membersData.unshift(record);
+            }
+
+            saveData();
+            closeMemberModal();
+        }
+
+        function deleteMember(id) {
+            const member = membersData.find(m => m.id === id);
+            if (!member) return;
+
+            if (confirm(`Are you sure you want to delete the record for "${member.fullName}"?`)) {
+                membersData = membersData.filter(m => m.id !== id);
+                saveData();
+            }
+        }
+
+        // FLASH DRIVE IMPORT & EXPORT FUNCTIONS
+
+        // Export to formatted CSV File
+        function exportToCSV() {
+            if (membersData.length === 0) {
+                alert('No member records to export.');
+                return;
+            }
+
+            const headers = [
+                "Full Name", "Address", "Date of Birth", "Age", "Marital Status", 
+                "Contact Number", "Spouse Name", "Date Become Member", 
+                "Initial Membership Payment (PHP)", "Annual Dues (PHP)", 
+                "Monthly Attendance (%)", "Status", "Group"
+            ];
+
+            let csvRows = [];
+            csvRows.push(headers.map(h => `"${h}"`).join(","));
+
+            membersData.forEach(m => {
+                const row = [
+                    `"${m.fullName || ''}"`,
+                    `"${m.address || ''}"`,
+                    `"${m.dob || ''}"`,
+                    `"${m.age || ''}"`,
+                    `"${m.maritalStatus || ''}"`,
+                    `"${m.contactNumber || ''}"`,
+                    `"${m.spouseName || ''}"`,
+                    `"${m.dateBecomeMember || ''}"`,
+                    `"₱${parseFloat(m.initialPayment || 0).toFixed(2)}"`,
+                    `"₱${parseFloat(m.annualDues || 0).toFixed(2)}"`,
+                    `"${m.monthlyAttendance}%"`,
+                    `"${m.status || ''}"`,
+                    `"${m.group || ''}"`
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            const csvString = csvRows.join("\n");
+            downloadFile(csvString, `NESCA_Members_Record_${getFormattedDate()}.csv`, 'text/csv;charset=utf-8;');
+        }
+
+        // Backup to JSON File
+        function exportToJSON() {
+            if (membersData.length === 0) {
+                alert('No member records to export.');
+                return;
+            }
+            const jsonString = JSON.stringify(membersData, null, 2);
+            downloadFile(jsonString, `NESCA_Backup_Data_${getFormattedDate()}.json`, 'application/json');
+        }
+
+        // Trigger Download Anchor
+        function downloadFile(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Import CSV or JSON File
+        function handleImportFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const content = evt.target.result;
+                    if (file.name.endsWith('.json')) {
+                        const parsed = JSON.parse(content);
+                        if (Array.isArray(parsed)) {
+                            if (confirm(`Import ${parsed.length} members from JSON? This will merge with or update your list.`)) {
+                                mergeImportedData(parsed);
+                            }
+                        } else {
+                            alert('Invalid JSON file structure.');
+                        }
+                    } else if (file.name.endsWith('.csv')) {
+                        parseAndImportCSV(content);
+                    }
+                } catch (err) {
+                    alert('Error reading import file: ' + err.message);
+                }
+                e.target.value = ''; // Reset input
+            };
+            reader.readAsText(file);
+        }
+
+        // CSV Parser for uploaded files
+        function parseAndImportCSV(text) {
+            const lines = text.split(/\r\n|\n/);
+            if (lines.length < 2) {
+                alert('CSV file is empty or missing rows.');
+                return;
+            }
+
+            let imported = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Regex parsing CSV fields respecting quotes
+                const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+
+                if (cols.length >= 5) {
+                    imported.push({
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
+                        fullName: cols[0] || 'Imported Member',
+                        address: cols[1] || '',
+                        dob: cols[2] || '',
+                        age: parseInt(cols[3]) || 0,
+                        maritalStatus: cols[4] || 'Single',
+                        contactNumber: cols[5] || '',
+                        spouseName: cols[6] || '',
+                        dateBecomeMember: cols[7] || new Date().toISOString().split('T')[0],
+                        initialPayment: parseFloat((cols[8] || '').replace(/[^0-9.]/g, '')) || 0,
+                        annualDues: parseFloat((cols[9] || '').replace(/[^0-9.]/g, '')) || 0,
+                        monthlyAttendance: parseInt((cols[10] || '').replace(/[^0-9]/g, '')) || 0,
+                        status: (cols[11] || '').includes('Inactive') ? 'Inactive' : 'Active',
+                        group: cols[12] || 'Unassigned'
+                    });
+                }
+            }
+
+            if (imported.length > 0) {
+                if (confirm(`Successfully parsed ${imported.length} member records. Merge into system?`)) {
+                    mergeImportedData(imported);
+                }
+            } else {
+                alert('Could not parse valid records from CSV file.');
+            }
+        }
+
+        function mergeImportedData(newList) {
+            membersData = [...membersData, ...newList];
+            saveData();
+            alert('Import completed successfully!');
+        }
+
+        function getFormattedDate() {
+            return new Date().toISOString().slice(0, 10);
+        }
+    </script>
+</body>
+</html>
